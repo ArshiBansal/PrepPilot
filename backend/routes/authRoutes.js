@@ -3,13 +3,13 @@ const { registerUser, loginUser,verifyEmail, resendVerificationEmail, getUserPro
 const { protect } = require("../middlewares/authMiddleware");
 const { upload } = require("../middlewares/uploadMiddleware");
 const router = express.Router();
-const { authLimiter } = require("../middlewares/rateLimiter");
+const { authLimiter, generalLimiter } = require("../middlewares/rateLimiter");
 
 // Auth Routes
 router.post("/register", authLimiter, registerUser);
 router.post("/login", authLimiter, loginUser);
-router.get("/profile", protect, getUserProfile);
-router.put("/profile", protect, updateUserProfile);
+router.get("/profile", protect, generalLimiter, getUserProfile);
+router.put("/profile", protect, generalLimiter, updateUserProfile);
 router.put("/change-password", protect, changePassword);
 router.delete("/delete-account", protect, deleteUserAccount);
 router.post("/resend-verification", authLimiter, resendVerificationEmail);
@@ -19,7 +19,7 @@ router.get("/verify-email", verifyEmail);
  * Upload a user profile image.
  * @route POST /api/auth/upload-image
  */
-router.post("/upload-image", upload.single("image"), (req, res) => {
+router.post("/upload-image", generalLimiter, upload.single("image"), (req, res) => {
   if (!req.file) {
     return res.status(400).json({ message: "No file uploaded" });
   }
